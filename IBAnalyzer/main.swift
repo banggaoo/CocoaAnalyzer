@@ -58,7 +58,7 @@ if !isInUnitTests {
 
     // This is required for us to be able to run unit tests.
     autoreleasepool { () -> Void in
-        let app = NSApplication.shared()
+        let app = NSApplication.shared
         let appDelegate = TestAppDelegate()
         app.delegate = appDelegate
         app.run()
