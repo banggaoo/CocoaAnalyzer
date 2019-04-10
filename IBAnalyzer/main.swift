@@ -9,6 +9,10 @@
 import Foundation
 import AppKit
 
+func printLog(_ string: String) {
+//    print(string)
+}
+
 let isInUnitTests = NSClassFromString("XCTest") != nil
 
 if !isInUnitTests {
@@ -30,15 +34,15 @@ if !isInUnitTests {
         print("Analyzing files located at: \(url.path)")
 
         let runner = Runner(path: url.path)
-        print("runner: \(runner)")
+        printLog("runner: \(runner)")
 
         Configuration.shared.setup(with: args)
         
-        print("args: \(runner)")
+        printLog("args: \(runner)")
 
         let issues = try runner.issues(using: [ConnectionAnalyzer()])
         
-        print("issues: \(issues)")
+        printLog("issues: \(issues)")
 
         var hasSeriousViolation: Bool = false
         for issue in issues {

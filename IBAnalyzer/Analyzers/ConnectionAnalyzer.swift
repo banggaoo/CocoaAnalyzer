@@ -9,6 +9,17 @@
 import Foundation
 import SourceKittenFramework
 
+extension String {
+    subscript(safe range: Range<Index>) -> Substring {
+        let endIndex: Index = self.endIndex
+        let lowerRangeIndex: Index = range.lowerBound
+        let upperRangeIndex: Index = range.upperBound
+        let subscriptedRange = Range(uncheckedBounds: (lower: Swift.min(lowerRangeIndex, endIndex), upper: Swift.min(upperRangeIndex, endIndex)))
+        
+        return self[subscriptedRange]
+    }
+}
+
 struct Declaration {
     var name: String
     var line: Int
@@ -52,13 +63,10 @@ struct Declaration {
     }
 
     private static func getLineColumnNumber(of file: File, offset: Int) -> (line: Int, column: Int) {
-        print("file.contents "+String(describing: file.contents))
-
+        printLog("file.contents "+String(describing: file.contents))
         
-        
-        
-        let range = file.contents.startIndex..<file.contents.index(file.contents.startIndex, offsetBy: offset)
-        let subString = file.contents[range] // .substring(with: range)
+        let range = file.contents.startIndex..<(file.contents.index(file.contents.startIndex, offsetBy: offset, limitedBy: file.contents.endIndex) ?? file.contents.endIndex)
+        let subString = file.contents[safe: range] // .substring(with: range)
         let lines = subString.components(separatedBy: "\n")
 
         if let column = lines.last?.count {

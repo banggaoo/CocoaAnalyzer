@@ -34,7 +34,7 @@ class Runner {
  
         let files = try nibFiles()
         for url in files {
-            print("nib "+url.absoluteString)
+            printLog("nib "+url.absoluteString)
 
             let connections = try nibParser.mappingForFile(at: url)
             for (key, value) in connections {
@@ -43,7 +43,7 @@ class Runner {
         }
 
         for url in try swiftFiles() {
-            print("swift "+url.absoluteString)
+            printLog("swift "+url.absoluteString)
 
             try swiftParser.mappingForFile(at: url, result: &classNameToClassMap)
         }
