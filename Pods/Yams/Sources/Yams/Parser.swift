@@ -7,76 +7,90 @@
 //
 
 #if SWIFT_PACKAGE
-    import CYaml
+import CYaml
 #endif
 import Foundation
 
 /// Parse all YAML documents in a String
 /// and produce corresponding Swift objects.
 ///
-/// - Parameters:
-///   - yaml: String
-///   - resolver: Resolver
-///   - constructor: Constructor
-/// - Returns: YamlSequence<Any>
-/// - Throws: YamlError
+/// - parameter yaml: String
+/// - parameter resolver: Resolver
+/// - parameter constructor: Constructor
+/// - parameter encoding: Parser.Encoding
+///
+/// - returns: YamlSequence<Any>
+///
+/// - throws: YamlError
 public func load_all(yaml: String,
                      _ resolver: Resolver = .default,
-                     _ constructor: Constructor = .default) throws -> YamlSequence<Any> {
-    let parser = try Parser(yaml: yaml, resolver: resolver, constructor: constructor)
+                     _ constructor: Constructor = .default,
+                     _ encoding: Parser.Encoding = .default) throws -> YamlSequence<Any> {
+    let parser = try Parser(yaml: yaml, resolver: resolver, constructor: constructor, encoding: encoding)
     return YamlSequence { try parser.nextRoot()?.any }
 }
 
 /// Parse the first YAML document in a String
 /// and produce the corresponding Swift object.
 ///
-/// - Parameters:
-///   - yaml: String
-///   - resolver: Resolver
-///   - constructor: Constructor
-/// - Returns: Any?
-/// - Throws: YamlError
+/// - parameter yaml: String
+/// - parameter resolver: Resolver
+/// - parameter constructor: Constructor
+/// - parameter encoding: Parser.Encoding
+///
+/// - returns: Any?
+///
+/// - throws: YamlError
 public func load(yaml: String,
                  _ resolver: Resolver = .default,
-                 _ constructor: Constructor = .default) throws -> Any? {
-    return try Parser(yaml: yaml, resolver: resolver, constructor: constructor).singleRoot()?.any
+                 _ constructor: Constructor = .default,
+                 _ encoding: Parser.Encoding = .default) throws -> Any? {
+    return try Parser(yaml: yaml, resolver: resolver, constructor: constructor, encoding: encoding).singleRoot()?.any
 }
 
 /// Parse all YAML documents in a String
 /// and produce corresponding representation trees.
 ///
-/// - Parameters:
-///   - yaml: String
-///   - resolver: Resolver
-///   - constructor: Constructor
-/// - Returns: YamlSequence<Node>
-/// - Throws: YamlError
+/// - parameter yaml: String
+/// - parameter resolver: Resolver
+/// - parameter constructor: Constructor
+/// - parameter encoding: Parser.Encoding
+///
+/// - returns: YamlSequence<Node>
+///
+/// - throws: YamlError
 public func compose_all(yaml: String,
                         _ resolver: Resolver = .default,
-                        _ constructor: Constructor = .default) throws -> YamlSequence<Node> {
-    let parser = try Parser(yaml: yaml, resolver: resolver, constructor: constructor)
+                        _ constructor: Constructor = .default,
+                        _ encoding: Parser.Encoding = .default) throws -> YamlSequence<Node> {
+    let parser = try Parser(yaml: yaml, resolver: resolver, constructor: constructor, encoding: encoding)
     return YamlSequence(parser.nextRoot)
 }
 
 /// Parse the first YAML document in a String
 /// and produce the corresponding representation tree.
 ///
-/// - Parameters:
-///   - yaml: String
-///   - resolver: Resolver
-///   - constructor: Constructor
-/// - Returns: Node?
-/// - Throws: YamlError
+/// - parameter yaml: String
+/// - parameter resolver: Resolver
+/// - parameter constructor: Constructor
+/// - parameter encoding: Parser.Encoding
+///
+/// - returns: Node?
+///
+/// - throws: YamlError
 public func compose(yaml: String,
                     _ resolver: Resolver = .default,
-                    _ constructor: Constructor = .default) throws -> Node? {
-    return try Parser(yaml: yaml, resolver: resolver, constructor: constructor).singleRoot()
+                    _ constructor: Constructor = .default,
+                    _ encoding: Parser.Encoding = .default) throws -> Node? {
+    return try Parser(yaml: yaml, resolver: resolver, constructor: constructor, encoding: encoding).singleRoot()
 }
 
-/// Sequence that holds error
+/// Sequence that holds an error.
 public struct YamlSequence<T>: Sequence, IteratorProtocol {
+    /// This sequence's error, if any.
     public private(set) var error: Swift.Error?
 
+    /// `Swift.Sequence.next()`.
     public mutating func next() -> T? {
         do {
             return try closure()
@@ -93,44 +107,79 @@ public struct YamlSequence<T>: Sequence, IteratorProtocol {
     private let closure: () throws -> T?
 }
 
+/// Parses YAML strings.
 public final class Parser {
-    // MARK: public
+    /// YAML string.
     public let yaml: String
+    /// Resolver.
     public let resolver: Resolver
+    /// Constructor.
     public let constructor: Constructor
+
+    /// Encoding
+    public enum Encoding: String {
+        /// Use `YAML_UTF8_ENCODING`
+        case utf8
+        /// Use `YAML_UTF16(BE|LE)_ENCODING`
+        case utf16
+        /// The default encoding, determined at run time based on the String type's native encoding.
+        /// This can be overridden by setting `YAMS_DEFAULT_ENCODING` to either `UTF8` or `UTF16`.
+        /// This value is case insensitive.
+        public static var `default`: Encoding = {
+            let key = "YAMS_DEFAULT_ENCODING"
+            if let yamsEncoding = ProcessInfo.processInfo.environment[key],
+                let encoding = Encoding(rawValue: yamsEncoding.lowercased()) {
+                print("""
+                    `Parser.Encoding.default` was set to `\(encoding)` by the `\(key)` environment variable.
+                    """)
+                return encoding
+            }
+            return key.utf8.withContiguousStorageIfAvailable({ _ in true }) != nil ? .utf8 : .utf16
+        }()
+    }
+    /// Encoding
+    public let encoding: Encoding
 
     /// Set up Parser.
     ///
-    /// - Parameter string: YAML
-    /// - Parameter resolver: Resolver
-    /// - Parameter constructor: Constructor
-    /// - Throws: YamlError
+    /// - parameter string: YAML string.
+    /// - parameter resolver: Resolver, `.default` if omitted.
+    /// - parameter constructor: Constructor, `.default` if omitted.
+    /// - parameter encoding: Encoding, `.default` if omitted.
+    ///
+    /// - throws: `YamlError`.
     public init(yaml string: String,
                 resolver: Resolver = .default,
-                constructor: Constructor = .default) throws {
+                constructor: Constructor = .default,
+                encoding: Encoding = .default) throws {
         yaml = string
         self.resolver = resolver
         self.constructor = constructor
+        self.encoding = encoding
 
         yaml_parser_initialize(&parser)
-        #if USE_UTF8
+        switch encoding {
+        case .utf8:
             yaml_parser_set_encoding(&parser, YAML_UTF8_ENCODING)
-            utf8CString = string.utf8CString
-            utf8CString.withUnsafeBytes { bytes in
-                let input = bytes.baseAddress?.assumingMemoryBound(to: UInt8.self)
-                yaml_parser_set_input_string(&parser, input, bytes.count - 1)
+            let utf8View = yaml.utf8
+            buffer = .utf8View(utf8View)
+            if try utf8View.withContiguousStorageIfAvailable(startParse(with:)) != nil {
+                // Attempt to parse with underlying UTF8 String encoding was successful, nothing further to do
+            } else {
+                // Fall back to using UTF8 slice
+                let utf8Slice = string.utf8CString.dropLast()
+                buffer = .utf8Slice(utf8Slice)
+                try utf8Slice.withUnsafeBytes(startParse(with:))
             }
-        #else
-            // use native endian
+        case .utf16:
+            // use native endianness
             let isLittleEndian = 1 == 1.littleEndian
             yaml_parser_set_encoding(&parser, isLittleEndian ? YAML_UTF16LE_ENCODING : YAML_UTF16BE_ENCODING)
             let encoding: String.Encoding = isLittleEndian ? .utf16LittleEndian : .utf16BigEndian
-            data = yaml.data(using: encoding)!
-            data.withUnsafeBytes { bytes in
-                yaml_parser_set_input_string(&parser, bytes, data.count)
-            }
-        #endif
-        try parse() // Drop YAML_STREAM_START_EVENT
+            let data = yaml.data(using: encoding)!
+            buffer = .utf16(data)
+            try data.withUnsafeBytes(startParse(with:))
+        }
     }
 
     deinit {
@@ -139,13 +188,19 @@ public final class Parser {
 
     /// Parse next document and return root Node.
     ///
-    /// - Returns: next Node
-    /// - Throws: YamlError
+    /// - returns: next Node.
+    ///
+    /// - throws: `YamlError`.
     public func nextRoot() throws -> Node? {
         guard !streamEndProduced, try parse().type != YAML_STREAM_END_EVENT else { return nil }
         return try loadDocument()
     }
 
+    /// Parses the document expecting a single root Node and returns it.
+    ///
+    /// - returns: Single root Node.
+    ///
+    /// - throws: `YamlError`.
     public func singleRoot() throws -> Node? {
         guard !streamEndProduced, try parse().type != YAML_STREAM_END_EVENT else { return nil }
         let node = try loadDocument()
@@ -161,29 +216,32 @@ public final class Parser {
         return node
     }
 
-    // MARK: private
-    fileprivate var anchors = [String: Node]()
-    fileprivate var parser = yaml_parser_t()
-#if USE_UTF8
-    private let utf8CString: ContiguousArray<CChar>
-#else
-    private let data: Data
-#endif
+    // MARK: - Private Members
+
+    private var anchors = [String: Node]()
+    private var parser = yaml_parser_t()
+
+    private enum Buffer {
+        case utf8View(String.UTF8View)
+        case utf8Slice(ArraySlice<CChar>)
+        case utf16(Data)
+    }
+    private var buffer: Buffer
 }
 
-// MARK: implementation details
-extension Parser {
-    fileprivate var streamEndProduced: Bool {
+// MARK: Implementation Details
+private extension Parser {
+    var streamEndProduced: Bool {
         return parser.stream_end_produced != 0
     }
 
-    fileprivate func loadDocument() throws -> Node {
+    func loadDocument() throws -> Node {
         let node = try loadNode(from: parse())
         try parse() // Drop YAML_DOCUMENT_END_EVENT
         return node
     }
 
-    private func loadNode(from event: Event) throws -> Node {
+    func loadNode(from event: Event) throws -> Node {
         switch event.type {
         case YAML_ALIAS_EVENT:
             return try loadAlias(from: event)
@@ -198,8 +256,18 @@ extension Parser {
         }
     }
 
+    func startParse(with buffer: UnsafeRawBufferPointer) throws {
+        yaml_parser_set_input_string(&parser, buffer.baseAddress?.assumingMemoryBound(to: UInt8.self), buffer.count)
+        try parse() // Drop YAML_STREAM_START_EVENT
+    }
+
+    func startParse(with buffer: UnsafeBufferPointer<UInt8>) throws {
+        yaml_parser_set_input_string(&parser, buffer.baseAddress, buffer.count)
+        try parse() // Drop YAML_STREAM_START_EVENT
+    }
+
     @discardableResult
-    fileprivate func parse() throws -> Event {
+    func parse() throws -> Event {
         let event = Event()
         guard yaml_parser_parse(&parser, &event.event) == 1 else {
             throw YamlError(from: parser, with: yaml)
@@ -207,7 +275,7 @@ extension Parser {
         return event
     }
 
-    private func loadAlias(from event: Event) throws -> Node {
+    func loadAlias(from event: Event) throws -> Node {
         guard let alias = event.aliasAnchor else {
             fatalError("unreachable")
         }
@@ -219,7 +287,7 @@ extension Parser {
         return node
     }
 
-    private func loadScalar(from event: Event) throws -> Node {
+    func loadScalar(from event: Event) throws -> Node {
         let node = Node.scalar(.init(event.scalarValue, tag(event.scalarTag), event.scalarStyle, event.startMark))
         if let anchor = event.scalarAnchor {
             anchors[anchor] = node
@@ -227,7 +295,7 @@ extension Parser {
         return node
     }
 
-    private func loadSequence(from firstEvent: Event) throws -> Node {
+    func loadSequence(from firstEvent: Event) throws -> Node {
         var array = [Node]()
         var event = try parse()
         while event.type != YAML_SEQUENCE_END_EVENT {
@@ -241,7 +309,7 @@ extension Parser {
         return node
     }
 
-    private func loadMapping(from firstEvent: Event) throws -> Node {
+    func loadMapping(from firstEvent: Event) throws -> Node {
         var pairs = [(Node, Node)]()
         var event = try parse()
         while event.type != YAML_MAPPING_END_EVENT {
@@ -258,7 +326,7 @@ extension Parser {
         return node
     }
 
-    private func tag(_ string: String?) -> Tag {
+    func tag(_ string: String?) -> Tag {
         let tagName = string.map(Tag.Name.init(rawValue:)) ?? .implicit
         return Tag(tagName, resolver, constructor)
     }
@@ -287,9 +355,8 @@ private class Event {
         return Node.Scalar.Style(rawValue: event.data.scalar.style.rawValue)!
     }
     var scalarTag: String? {
-        guard event.data.scalar.plain_implicit == 0,
-            event.data.scalar.quoted_implicit == 0 else {
-                return nil
+        if event.data.scalar.quoted_implicit == 1 {
+            return Tag.Name.str.rawValue
         }
         return string(from: event.data.scalar.tag)
     }
@@ -336,3 +403,39 @@ private class Event {
 private func string(from pointer: UnsafePointer<UInt8>!) -> String? {
     return String.decodeCString(pointer, as: UTF8.self, repairingInvalidCodeUnits: true)?.result
 }
+
+#if swift(>=4.2)
+#if !compiler(>=5)
+private extension Data {
+    func withUnsafeBytes<Result>(_ apply: (UnsafeRawBufferPointer) throws -> Result) rethrows -> Result {
+        return try withUnsafeBytes {
+            try apply(UnsafeRawBufferPointer(start: $0, count: count))
+        }
+    }
+}
+#endif
+#else
+private extension Data {
+    func withUnsafeBytes<Result>(_ apply: (UnsafeRawBufferPointer) throws -> Result) rethrows -> Result {
+        return try withUnsafeBytes {
+            try apply(UnsafeRawBufferPointer(start: $0, count: count))
+        }
+    }
+}
+#endif
+
+#if swift(>=4.2)
+#if !compiler(>=5)
+private extension String.UTF8View {
+    func withContiguousStorageIfAvailable<R>(_ body: (UnsafeBufferPointer<Element>) throws -> R) rethrows -> R? {
+        return nil
+    }
+}
+#endif
+#else
+private extension String.UTF8View {
+    func withContiguousStorageIfAvailable<R>(_ body: (UnsafeBufferPointer<Element>) throws -> R) rethrows -> R? {
+        return nil
+    }
+}
+#endif

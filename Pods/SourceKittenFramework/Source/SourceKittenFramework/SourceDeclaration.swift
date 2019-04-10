@@ -41,6 +41,7 @@ public struct SourceDeclaration {
     public let documentation: Documentation?
     public let commentBody: String?
     public var children: [SourceDeclaration]
+    public let annotations: [String]?
     public let swiftDeclaration: String?
     public let swiftName: String?
     public let availability: ClangAvailability?
@@ -134,11 +135,19 @@ extension SourceDeclaration {
         declaration = cursor.declaration()
         documentation = Documentation(comment: cursor.parsedComment())
         commentBody = cursor.commentBody()
-        children = cursor.flatMap({
+        children = cursor.compactMap({
             SourceDeclaration(cursor: $0, compilerArguments: compilerArguments)
         }).rejectPropertyMethods()
         (swiftDeclaration, swiftName) = cursor.swiftDeclarationAndName(compilerArguments: compilerArguments)
         availability = cursor.platformAvailability()
+
+        let annotations: [String] = cursor.compactMap({
+            if $0.kind == CXCursor_AnnotateAttr {
+                return clang_getCursorSpelling($0).str()
+            }
+            return nil
+        })
+        self.annotations = annotations.isEmpty ? nil : annotations
     }
 }
 
@@ -156,7 +165,7 @@ extension Sequence where Iterator.Element == SourceDeclaration {
     /// Reject one of an enum duplicate pair that's empty if the other isn't.
     func rejectEmptyDuplicateEnums() -> [SourceDeclaration] {
         let enums = filter { $0.type == .enum }
-        let enumUSRs = enums.map { $0.usr! }
+        let enumUSRs = enums.compactMap { $0.usr }
         let dupedEmptyUSRs = enumUSRs.filter { usr in
             let enumsForUSR = enums.filter { $0.usr == usr }
             let childCounts = Set(enumsForUSR.map({ $0.children.count }))
@@ -169,14 +178,14 @@ extension Sequence where Iterator.Element == SourceDeclaration {
 }
 
 extension SourceDeclaration: Hashable {
-    public var hashValue: Int {
-        return usr?.hashValue ?? 0
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(usr)
     }
-}
 
-public func == (lhs: SourceDeclaration, rhs: SourceDeclaration) -> Bool {
-    return lhs.usr == rhs.usr &&
-        lhs.location == rhs.location
+    public static func == (lhs: SourceDeclaration, rhs: SourceDeclaration) -> Bool {
+        return lhs.usr == rhs.usr &&
+            lhs.location == rhs.location
+    }
 }
 
 // MARK: Comparable
@@ -186,6 +195,6 @@ extension SourceDeclaration: Comparable {}
 /// A [strict total order](http://en.wikipedia.org/wiki/Total_order#Strict_total_order)
 /// over instances of `Self`.
 public func < (lhs: SourceDeclaration, rhs: SourceDeclaration) -> Bool {
-    return lhs.location < rhs.location
+    return lhs.location == rhs.location ? lhs.extent.end < rhs.extent.end : lhs.location < rhs.location
 }
 #endif

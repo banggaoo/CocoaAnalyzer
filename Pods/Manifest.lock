@@ -1,12 +1,14 @@
 PODS:
-  - SourceKittenFramework (0.19.1):
-    - SWXMLHash (~> 4.1)
-    - Yams (~> 0.5.0)
-  - SWXMLHash (4.5.0)
-  - Yams (0.5.0)
+  - SourceKittenFramework (0.23.0):
+    - SWXMLHash (~> 4.7)
+    - Yams (~> 2.0)
+  - SWXMLHash (4.9.0)
+  - Yams (2.0.0)
 
 DEPENDENCIES:
-  - SourceKittenFramework (~> 0.19)
+  - SourceKittenFramework (~> 0.23)
+  - SWXMLHash (~> 4.9.0)
+  - Yams
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -15,10 +17,10 @@ SPEC REPOS:
     - Yams
 
 SPEC CHECKSUMS:
-  SourceKittenFramework: ef76be16e76ffa0a64b00c5eb053e87c6770dcdb
-  SWXMLHash: 5d980b1f12ff0ee2bd9a26df1e01377dc91dfb6e
-  Yams: 58b13424ca380835c4c797bc775ce6cbb3bc0167
+  SourceKittenFramework: 753d109efdc19ae1d7254b016c201c6dd730dd3b
+  SWXMLHash: 87b0006848a548b7f9485b40bc71721b3ae39add
+  Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: f5da0c5a6f5e1ae373958fac25d8ec3e9fe584a7
+PODFILE CHECKSUM: 190f023c032d2aa0b94c78842515b4df4d00aebc
 
 COCOAPODS: 1.6.1

@@ -51,7 +51,7 @@ platform :ios, '10.0'
 use_frameworks!
 
 target 'YOUR_TARGET_NAME' do
-  pod 'SWXMLHash', '~> 4.0.0'
+  pod 'SWXMLHash', '~> 4.7.0'
 end
 ```
 
@@ -73,7 +73,7 @@ $ brew install carthage
 Then add the following line to your `Cartfile`:
 
 ```
-github "drmohundro/SWXMLHash" ~> 4.0
+github "drmohundro/SWXMLHash" ~> 4.7
 ```
 
 ### Swift Package Manager
@@ -83,7 +83,7 @@ Swift Package Manager requires Swift version 4.0 or higher. First, create a
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/drmohundro/SWXMLHash.git", from: "4.0.0")
+    .package(url: "https://github.com/drmohundro/SWXMLHash.git", from: "4.7.0")
 ]
 ```
 
@@ -148,6 +148,11 @@ The available options at this time are:
   * See
     [Codable's userInfo docs](https://developer.apple.com/documentation/swift/encoder/2894907-userinfo)
   * The default is [:]
+* `detectParsingErrors`
+  * This setting attempts to detect XML parsing errors. `parse` will return an
+    `XMLIndexer.parsingError` if any parsing issues are found.
+  * Defaults to `false` (because of backwards compatibility and because many
+    users attempt to parse HTML with this library)
 
 ## Examples
 
@@ -247,7 +252,7 @@ Alternatively, you can look up an element with specific attributes. The below
 will return "John".
 
 ```swift
-xml["root"]["catalog"]["book"].withAttr("id", "123")["author"].element?.text
+xml["root"]["catalog"]["book"].withAttribute("id", "123")["author"].element?.text
 ```
 
 ### Returning All Elements At Current Level
@@ -349,10 +354,10 @@ of the `XMLElement` class or by index as well.
 
 ```swift
 let subIndexer = xml!["root"]["catalog"]["book"]
-    .filter { elem, _ in elem.attribute(by: "id")!.text == "bk102" }
-    .filter { _, index in index >= 1 && index <= 3 }
+    .filterAll { elem, _ in elem.attribute(by: "id")!.text == "bk102" }
+    .filterChildren { _, index in index >= 1 && index <= 3 }
 
-print(subIndexer[0].element?.text)
+print(subIndexer.children[0].element?.text)
 ```
 
 ### Error Handling

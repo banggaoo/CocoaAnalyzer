@@ -6,8 +6,6 @@
 //  Copyright (c) 2015 SourceKitten. All rights reserved.
 //
 
-import Foundation
-
 /// SourceKit response dictionary keys.
 public enum SwiftDocKey: String {
     // MARK: SourceKit Keys
@@ -20,6 +18,8 @@ public enum SwiftDocKey: String {
     case bodyOffset           = "key.bodyoffset"
     /// Diagnostic stage (String).
     case diagnosticStage      = "key.diagnostic_stage"
+    /// Elements ([[String: SourceKitRepresentable]]).
+    case elements             = "key.elements"
     /// File path (String).
     case filePath             = "key.filepath"
     /// Full XML docs (String).
@@ -36,7 +36,7 @@ public enum SwiftDocKey: String {
     case nameOffset           = "key.nameoffset"
     /// Offset (Int64).
     case offset               = "key.offset"
-    /// Substructure ([SourceKitRepresentable]).
+    /// Substructure ([[String: SourceKitRepresentable]]).
     case substructure         = "key.substructure"
     /// Syntax map (NSData).
     case syntaxMap            = "key.syntaxmap"
@@ -87,6 +87,8 @@ public enum SwiftDocKey: String {
     case deprecationMessage   = "key.deprecation_message"
     /// Always unavailable (String).
     case unavailableMessage   = "key.unavailable_message"
+    /// Annotations ([String]).
+    case annotations          = "key.annotations"
 
     // MARK: Typed SwiftDocKey Getters
 
@@ -186,7 +188,7 @@ public enum SwiftDocKey: String {
 
     - returns: Substructure array if successful.
     */
-    internal static func getSubstructure(_ dictionary: [String: SourceKitRepresentable]) -> [SourceKitRepresentable]? {
+    internal static func getSubstructure(_ dictionary: [String: SourceKitRepresentable]) -> [[String: SourceKitRepresentable]]? {
         return get(.substructure, dictionary)
     }
 

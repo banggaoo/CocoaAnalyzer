@@ -25,7 +25,6 @@
 		A6C7454C1E3E22D200022FE8 /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C7454B1E3E22D200022FE8 /* Runner.swift */; };
 		A6C7454E1E3E2D8D00022FE8 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C7454D1E3E2D8D00022FE8 /* RunnerTests.swift */; };
 		A6C745501E3E399B00022FE8 /* Stubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C7454F1E3E399B00022FE8 /* Stubs.swift */; };
-		CDEBE70B9B3321A0334DB5CD /* Pods_IBAnalyzer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08942F87728CC5FF156668DC /* Pods_IBAnalyzer.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,7 +73,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				29A514F6C38C759C0D35A5FB /* Pods_IBAnalyzer.framework in Frameworks */,
-				CDEBE70B9B3321A0334DB5CD /* Pods_IBAnalyzer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,7 +208,6 @@
 			buildConfigurationList = A694A0A01E0F285D008A0A0A /* Build configuration list for PBXNativeTarget "IBAnalyzer" */;
 			buildPhases = (
 				3C4EC3DB4C4DC0035E91FC30 /* [CP] Check Pods Manifest.lock */,
-				A66875091E2A9306004978F8 /* SwiftLint */,
 				A694A0871E0F285D008A0A0A /* Sources */,
 				A694A0881E0F285D008A0A0A /* Frameworks */,
 				A694A0891E0F285D008A0A0A /* Resources */,
@@ -346,20 +343,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-IBAnalyzer-IBAnalyzerTests/Pods-IBAnalyzer-IBAnalyzerTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
-		};
-		A66875091E2A9306004978F8 /* SwiftLint */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = SwiftLint;
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if which ${PODS_ROOT}/SwiftLint/swiftlint >/dev/null; then\n${PODS_ROOT}/SwiftLint/swiftlint\nelse\necho \"warning: SwiftLint not installed, run 'pod install'\"\nfi\n";
 		};
 		A6EDA62C1E3D4B9C00DBD41F /* Copy Built Product to Local Folder */ = {
 			isa = PBXShellScriptBuildPhase;

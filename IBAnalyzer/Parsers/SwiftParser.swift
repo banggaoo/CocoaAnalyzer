@@ -89,7 +89,7 @@ class SwiftParser: SwiftParserType {
             return []
         }
 
-        let result = inherited.map { $0["key.name"] }.flatMap { $0 }
+        let result = inherited.map { $0["key.name"] }.compactMap { $0 }
         return result
     }
 }
@@ -97,7 +97,7 @@ class SwiftParser: SwiftParserType {
 private extension Dictionary where Key: ExpressibleByStringLiteral {
     var substructure: [[String: SourceKitRepresentable]] {
         let substructure = self["key.substructure"] as? [SourceKitRepresentable] ?? []
-        return substructure.flatMap { $0 as? [String: SourceKitRepresentable] }
+        return substructure.compactMap { $0 as? [String: SourceKitRepresentable] }
     }
 
     var isOptional: Bool {

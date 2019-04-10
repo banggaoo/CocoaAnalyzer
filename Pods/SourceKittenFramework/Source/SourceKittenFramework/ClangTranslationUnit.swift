@@ -33,8 +33,8 @@ extension Sequence {
 extension Dictionary {
     fileprivate init(_ pairs: [Element]) {
         self.init()
-        for (k, v) in pairs {
-            self[k] = v
+        for (key, value) in pairs {
+            self[key] = value
         }
     }
 
@@ -61,7 +61,7 @@ public struct ClangTranslationUnit {
         let clangIndex = ClangIndex()
         clangTranslationUnits = headerFiles.map { clangIndex.open(file: $0, args: cStringCompilerArguments) }
         declarations = clangTranslationUnits
-            .flatMap { $0.cursor().flatMap({ SourceDeclaration(cursor: $0, compilerArguments: compilerArguments) }) }
+            .flatMap { $0.cursor().compactMap({ SourceDeclaration(cursor: $0, compilerArguments: compilerArguments) }) }
             .rejectEmptyDuplicateEnums()
             .distinct()
             .sorted()
@@ -78,8 +78,8 @@ public struct ClangTranslationUnit {
     - parameter path:                Path to run `xcodebuild` from. Uses current path by default.
     */
     public init?(headerFiles: [String], xcodeBuildArguments: [String], inPath path: String = FileManager.default.currentDirectoryPath) {
-        let xcodeBuildOutput = runXcodeBuild(arguments: xcodeBuildArguments + ["-dry-run"], inPath: path) ?? ""
-        guard let clangArguments = parseCompilerArguments(xcodebuildOutput: xcodeBuildOutput as NSString, language: .objc, moduleName: nil) else {
+        let xcodeBuildOutput = XcodeBuild.cleanBuild(arguments: xcodeBuildArguments + ["-dry-run"], inPath: path) ?? ""
+        guard let clangArguments = parseCompilerArguments(xcodebuildOutput: xcodeBuildOutput, language: .objc, moduleName: nil) else {
             fputs("could not parse compiler arguments\n\(xcodeBuildOutput)\n", stderr)
             return nil
         }

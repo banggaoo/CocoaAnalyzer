@@ -108,6 +108,7 @@ private func toOutputDictionary(_ decl: SourceDeclaration) -> [String: Any] {
     set(.alwaysUnavailable, decl.availability?.alwaysUnavailable)
     set(.deprecationMessage, decl.availability?.deprecationMessage)
     set(.unavailableMessage, decl.availability?.unavailableMessage)
+    set(.annotations, decl.annotations)
 
     setA(.docResultDiscussion, decl.documentation?.returnDiscussion.map(toOutputDictionary))
     setA(.docParameters, decl.documentation?.parameters.map(toOutputDictionary))
@@ -130,9 +131,9 @@ private func toOutputDictionary(_ param: Parameter) -> [String: Any] {
 
 private func toOutputDictionary(_ text: Text) -> [String: Any] {
     switch text {
-    case .para(let str, let kind):
+    case let .para(str, kind):
         return ["kind": kind ?? "", "Para": str]
-    case .verbatim(let str):
+    case let .verbatim(str):
         return ["kind": "", "Verbatim": str]
     }
 }

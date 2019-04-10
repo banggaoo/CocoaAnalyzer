@@ -6,8 +6,6 @@
 //  Copyright (c) 2015 SourceKitten. All rights reserved.
 //
 
-import Foundation
-
 /// Represents a Swift file's syntax information.
 public struct SyntaxMap {
     /// Array of SyntaxToken's.
@@ -68,7 +66,7 @@ extension SyntaxMap {
     /// that they occur in the file.
     internal var docCommentRanges: [Range<Int>] {
         let docCommentBlocks = tokens.split { !$0.isDocComment }
-        return docCommentBlocks.flatMap { ranges in
+        return docCommentBlocks.compactMap { ranges in
             ranges.first.flatMap { first in
                 ranges.last.flatMap { last -> Range<Int>? in
                     first.offset..<last.offset + last.length

@@ -22,7 +22,7 @@ public struct Module {
     public var docs: [SwiftDocs] {
         var fileIndex = 1
         let sourceFilesCount = sourceFiles.count
-        return sourceFiles.flatMap {
+        return sourceFiles.sorted().compactMap {
             let filename = $0.bridge().lastPathComponent
             if let file = File(path: $0) {
                 fputs("Parsing \(filename) (\(fileIndex)/\(sourceFilesCount))\n", stderr)
@@ -42,7 +42,7 @@ public struct Module {
         }
         guard let moduleCommand = commands.first(where: { $0["module-name"]?.string == spmName }) else {
             fputs("Could not find SPM module '\(spmName)'. Here are the modules available:\n", stderr)
-            let availableModules = commands.flatMap({ $0["module-name"]?.string })
+            let availableModules = commands.compactMap({ $0["module-name"]?.string })
             fputs("\(availableModules.map({ "  - " + $0 }).joined(separator: "\n"))\n", stderr)
             return nil
         }
@@ -72,9 +72,32 @@ public struct Module {
     - parameter path:                Path to run `xcodebuild` from. Uses current path by default.
     */
     public init?(xcodeBuildArguments: [String], name: String? = nil, inPath path: String = FileManager.default.currentDirectoryPath) {
-        let xcodeBuildOutput = runXcodeBuild(arguments: xcodeBuildArguments, inPath: path) ?? ""
-        guard let arguments = parseCompilerArguments(xcodebuildOutput: xcodeBuildOutput.bridge(), language: .swift,
-                                                     moduleName: name ?? moduleName(fromArguments: xcodeBuildArguments)) else {
+        let buildSettings = XcodeBuild.showBuildSettings(arguments: xcodeBuildArguments, inPath: path)
+
+        let name = name
+            // Check for user-defined "SWIFT_MODULE_NAME", otherwise use "PRODUCT_MODULE_NAME".
+            ?? buildSettings?.firstBuildSettingValue { $0.SWIFT_MODULE_NAME ?? $0.PRODUCT_MODULE_NAME }
+            ?? moduleName(fromArguments: xcodeBuildArguments)
+
+        // Executing normal build
+        fputs("Running xcodebuild\n", stderr)
+        if let output = XcodeBuild.run(arguments: xcodeBuildArguments, inPath: path),
+            let arguments = parseCompilerArguments(xcodebuildOutput: output, language: .swift, moduleName: name),
+            let moduleName = moduleName(fromArguments: arguments) {
+            self.init(name: moduleName, compilerArguments: arguments)
+            return
+        }
+        // Check New Build System is used
+        fputs("Checking xcodebuild -showBuildSettings\n", stderr)
+        if let projectTempRoot = buildSettings?.firstBuildSettingValue(for: { $0.PROJECT_TEMP_ROOT }),
+            let arguments = checkNewBuildSystem(in: projectTempRoot, moduleName: name),
+            let moduleName = moduleName(fromArguments: arguments) {
+            self.init(name: moduleName, compilerArguments: arguments)
+            return
+        }
+        // Executing `clean build` is a fallback.
+        let xcodeBuildOutput = XcodeBuild.cleanBuild(arguments: xcodeBuildArguments, inPath: path) ?? ""
+        guard let arguments = parseCompilerArguments(xcodebuildOutput: xcodeBuildOutput, language: .swift, moduleName: name) else {
             fputs("Could not parse compiler arguments from `xcodebuild` output.\n", stderr)
             fputs("Please confirm that `xcodebuild` is building a Swift module.\n", stderr)
             let file = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("xcodebuild-\(NSUUID().uuidString).log")
@@ -112,5 +135,22 @@ extension Module: CustomStringConvertible {
     /// A textual representation of `Module`.
     public var description: String {
         return "Module(name: \(name), compilerArguments: \(compilerArguments), sourceFiles: \(sourceFiles))"
+    }
+}
+
+// MARK: XcodeBuildSetting Conveniences
+
+private extension Collection where Element == XcodeBuildSetting {
+    /// Iterates through the `XcodeBuildSetting`s and returns the first value returned by the getter closure.
+    ///
+    /// For example, if we want the value of the first `XcodeBuildSetting` with a `"PROJECT_TEMP_ROOT"` value:
+    ///
+    ///     let buildSettings: [XcodeBuildSetting] = ...
+    ///     let projectTempRoot = buildSettings.firstBuildSettingValue { $0.projectTempRoot }
+    ///
+    /// - Parameter getterClosure: A closure that returns a dynamic member.
+    /// - Returns: The first value returned by the getter closure.
+    func firstBuildSettingValue(for getterClosure: (XcodeBuildSetting) -> String?) -> String? {
+        return lazy.compactMap(getterClosure).first
     }
 }

@@ -53,7 +53,7 @@ struct Declaration {
 
     private static func getLineColumnNumber(of file: File, offset: Int) -> (line: Int, column: Int) {
         let range = file.contents.startIndex..<file.contents.index(file.contents.startIndex, offsetBy: offset)
-        let subString = file.contents.substring(with: range)
+        let subString = file.contents[range] // .substring(with: range)
         let lines = subString.components(separatedBy: "\n")
 
         if let column = lines.last?.count {

@@ -11,36 +11,22 @@ import Foundation
 extension String {
     typealias LineNumberColumnAndContents = (lineNumber: Int, column: Int, contents: String)
 
-    /// line number, column and contents at utf8 offset.
+    /// line number, column and contents at offset.
     ///
-    /// - Parameter offset: Int
-    /// - Returns: lineNumber: line number start from 0,
+    /// - parameter offset: Int
+    ///
+    /// - returns: lineNumber: line number start from 0,
     ///            column: utf16 column start from 0,
     ///            contents: substring of line
-    func utf8LineNumberColumnAndContents(at offset: Int) -> LineNumberColumnAndContents? {
-        guard let index = utf8
-            .index(utf8.startIndex, offsetBy: offset, limitedBy: utf8.endIndex)?
-            .samePosition(in: self) else { return nil }
-        return lineNumberColumnAndContents(at: index)
-    }
-
-    /// line number, column and contents at utf16 offset.
-    ///
-    /// - Parameter offset: Int
-    /// - Returns: lineNumber: line number start from 0,
-    ///            column: utf16 column start from 0,
-    ///            contents: substring of line
-    func utf16LineNumberColumnAndContents(at offset: Int) -> LineNumberColumnAndContents? {
-        guard let index = utf16
-            .index(utf16.startIndex, offsetBy: offset, limitedBy: utf16.endIndex)?
-            .samePosition(in: self) else { return nil }
-        return lineNumberColumnAndContents(at: index)
+    func lineNumberColumnAndContents(at offset: Int) -> LineNumberColumnAndContents? {
+        return index(startIndex, offsetBy: offset, limitedBy: endIndex).flatMap(lineNumberColumnAndContents)
     }
 
     /// line number, column and contents at Index.
     ///
-    /// - Parameter index: String.Index
-    /// - Returns: lineNumber: line number start from 0,
+    /// - parameter index: String.Index
+    ///
+    /// - returns: lineNumber: line number start from 0,
     ///            column: utf16 column start from 0,
     ///            contents: substring of line
     func lineNumberColumnAndContents(at index: Index) -> LineNumberColumnAndContents {
@@ -66,8 +52,9 @@ extension String {
 
     /// substring indicated by line number.
     ///
-    /// - Parameter line: line number starts from 0.
-    /// - Returns: substring of line contains line ending characters
+    /// - parameter line: line number starts from 0.
+    ///
+    /// - returns: substring of line contains line ending characters
     func substring(at line: Int) -> String {
         var number = 0
         var outStartIndex = startIndex, outEndIndex = startIndex, outContentsEndIndex = startIndex
