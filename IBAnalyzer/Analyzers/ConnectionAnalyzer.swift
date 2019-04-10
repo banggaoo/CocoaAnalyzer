@@ -52,6 +52,11 @@ struct Declaration {
     }
 
     private static func getLineColumnNumber(of file: File, offset: Int) -> (line: Int, column: Int) {
+        print("file.contents "+String(describing: file.contents))
+
+        
+        
+        
         let range = file.contents.startIndex..<file.contents.index(file.contents.startIndex, offsetBy: offset)
         let subString = file.contents[range] // .substring(with: range)
         let lines = subString.components(separatedBy: "\n")

@@ -41,13 +41,16 @@ class SwiftParser: SwiftParserType {
     private func parseSubstructure(_ substructure: [[String: SourceKitRepresentable]],
                                    result: inout [String: Class],
                                    file: File) {
+
         for structure in substructure {
             var outlets: [Declaration] = []
             var actions: [Declaration] = []
+            print("structure "+String(describing: structure))
 
             if let kind = structure["key.kind"] as? String,
                 let name = structure["key.name"] as? String,
                 kind == "source.lang.swift.decl.class" || kind == "source.lang.swift.decl.extension" {
+                print("name "+String(describing: name))
 
                 for insideStructure in structure.substructure {
                     if let attributes = insideStructure["key.attributes"] as? [[String: AnyObject]],
@@ -58,6 +61,7 @@ class SwiftParser: SwiftParserType {
                         }
 
                         if isOutlet, let nameOffset64 = insideStructure["key.nameoffset"] as? Int64 {
+                            print("Declaration "+String(describing: propertyName))
                             outlets.append(Declaration(name: propertyName, file: file, offset: nameOffset64, isOptional: insideStructure.isOptional))
                         }
 
@@ -67,6 +71,7 @@ class SwiftParser: SwiftParserType {
 
                         if isIBAction, let selectorName = insideStructure["key.selector_name"] as? String,
                             let nameOffset64 = insideStructure["key.nameoffset"] as? Int64 {
+                            print("Declaration "+String(describing: selectorName))
                             actions.append(Declaration(name: selectorName, file: file, offset: nameOffset64))
                         }
                     }

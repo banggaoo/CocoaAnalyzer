@@ -31,8 +31,11 @@ class Runner {
     func issues(using analyzers: [Analyzer]) throws -> [Issue] {
         var classNameToNibMap: [String: Nib] = [:]
         var classNameToClassMap: [String: Class] = [:]
+ 
+        let files = try nibFiles()
+        for url in files {
+            print("nib "+url.absoluteString)
 
-        for url in try nibFiles() {
             let connections = try nibParser.mappingForFile(at: url)
             for (key, value) in connections {
                 classNameToNibMap[key] = value
@@ -40,6 +43,8 @@ class Runner {
         }
 
         for url in try swiftFiles() {
+            print("swift "+url.absoluteString)
+
             try swiftParser.mappingForFile(at: url, result: &classNameToClassMap)
         }
 
