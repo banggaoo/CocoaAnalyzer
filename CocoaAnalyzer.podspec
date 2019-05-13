@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "CocoaAnalyzer"
-  s.version      = "0.4.0"
+  s.version      = "0.4.1"
   s.summary      = "Tool for finding xib and storyboard-related issues at the build time."
 
   s.homepage     = "https://github.com/banggaoo/CocoaAnalyzer"
