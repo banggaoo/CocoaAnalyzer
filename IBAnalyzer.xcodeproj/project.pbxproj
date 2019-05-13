@@ -42,6 +42,7 @@
 		1286FDFC4DB84B6AD01BEA27 /* Pods_IBAnalyzer_IBAnalyzerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IBAnalyzer_IBAnalyzerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3380EE37A3DB54C65C38DAF8 /* Pods-IBAnalyzer-IBAnalyzerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IBAnalyzer-IBAnalyzerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-IBAnalyzer-IBAnalyzerTests/Pods-IBAnalyzer-IBAnalyzerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		59B985307441937FE31CF8AF /* Pods-IBAnalyzer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IBAnalyzer.release.xcconfig"; path = "Pods/Target Support Files/Pods-IBAnalyzer/Pods-IBAnalyzer.release.xcconfig"; sourceTree = "<group>"; };
+		70D456BA2289888B000B028F /* IBAnalyzer.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = IBAnalyzer.podspec; sourceTree = SOURCE_ROOT; };
 		99F3C9955B5DC893902EF9A4 /* Pods-IBAnalyzer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IBAnalyzer.debug.xcconfig"; path = "Pods/Target Support Files/Pods-IBAnalyzer/Pods-IBAnalyzer.debug.xcconfig"; sourceTree = "<group>"; };
 		A62F865B1E11788D0026A788 /* SwiftParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftParser.swift; sourceTree = "<group>"; };
 		A62F865D1E1178C30026A788 /* SwiftParserTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftParserTests.swift; sourceTree = "<group>"; };
@@ -107,6 +108,7 @@
 				A6C745451E3E16E500022FE8 /* Models */,
 				A6C7453F1E3E160200022FE8 /* Parsers */,
 				A694A0941E0F285D008A0A0A /* Info.plist */,
+				70D456BA2289888B000B028F /* IBAnalyzer.podspec */,
 				A69E65BC1E0F28D100F2EE7B /* main.swift */,
 				A6C7454B1E3E22D200022FE8 /* Runner.swift */,
 			);

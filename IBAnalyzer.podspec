@@ -1,15 +1,15 @@
 Pod::Spec.new do |s|
 
-  s.name         = "IBAnalyzer"
-  s.version      = "0.3.0"
+  s.name         = "CocoaAnalyzer"
+  s.version      = "0.4.0"
   s.summary      = "Tool for finding xib and storyboard-related issues at the build time."
 
-  s.homepage     = "https://github.com/fastred/IBAnalyzer"
+  s.homepage     = "https://github.com/banggaoo/CocoaAnalyzer"
   s.license      = "MIT"
-  s.author       = { "Arkadiusz Holko" => "fastred@fastred.org" }
-  s.social_media_url = "https://twitter.com/arekholko"
+  s.author       = { "James Lee" => "jameslee@goodeffect.com" }
 
-  s.source       = { :http => "https://github.com/fastred/IBAnalyzer/releases/download/#{s.version}/ibanalyzer-#{s.version}.zip" }
+  s.source       = { :git => 'https://github.com/banggaoo/CocoaAnalyzer.git', :tag => s.version.to_s }
+
   s.preserve_paths = '*'
 
 end
