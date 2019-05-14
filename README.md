@@ -52,6 +52,7 @@ New warnings can be implemented by adding a new type conforming to the `Analyzer
 ### CocoaPods (Build Phase integration)
 
 Note: This can significantly slow-down your build times.
+Note: You have to upload your binary to 'bin' folder. Also frameworks.
 
 1. Add `pod 'IBAnalyzer'` to your `Podfile`.
 1. Run `pod repo update` and then `pod install`.
