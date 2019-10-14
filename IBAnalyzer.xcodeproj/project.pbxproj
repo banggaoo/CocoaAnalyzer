@@ -24,6 +24,7 @@
 		A6C7454E1E3E2D8D00022FE8 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C7454D1E3E2D8D00022FE8 /* RunnerTests.swift */; };
 		A6C745501E3E399B00022FE8 /* Stubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C7454F1E3E399B00022FE8 /* Stubs.swift */; };
 		C9A9E24B94FE385A5B0EE916 /* libPods-IBAnalyzer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B93382536B0299A43D7B1B37 /* libPods-IBAnalyzer.a */; };
+		CE56BFBC235441C500414DED /* Examples in Resources */ = {isa = PBXBuildFile; fileRef = CE56BFBB235441C500414DED /* Examples */; };
 		F17FABC9BC6187925A0AFC3C /* libPods-IBAnalyzer-IBAnalyzerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1214290A5A1B31113F56B482 /* libPods-IBAnalyzer-IBAnalyzerTests.a */; };
 /* End PBXBuildFile section */
 
@@ -63,6 +64,7 @@
 		A6C7454F1E3E399B00022FE8 /* Stubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stubs.swift; sourceTree = "<group>"; };
 		B93382536B0299A43D7B1B37 /* libPods-IBAnalyzer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-IBAnalyzer.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0B63EFCADEBFFDBA46CBB5 /* Pods-IBAnalyzer-IBAnalyzerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IBAnalyzer-IBAnalyzerTests.release.xcconfig"; path = "Target Support Files/Pods-IBAnalyzer-IBAnalyzerTests/Pods-IBAnalyzer-IBAnalyzerTests.release.xcconfig"; sourceTree = "<group>"; };
+		CE56BFBB235441C500414DED /* Examples */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Examples; sourceTree = "<group>"; };
 		DB8AB0E91BC4897A0E3C913C /* Pods-IBAnalyzer-IBAnalyzerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IBAnalyzer-IBAnalyzerTests.debug.xcconfig"; path = "Target Support Files/Pods-IBAnalyzer-IBAnalyzerTests/Pods-IBAnalyzer-IBAnalyzerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		DDB046C1A6DCFF6DD4A69B38 /* Pods-IBAnalyzer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IBAnalyzer.release.xcconfig"; path = "Target Support Files/Pods-IBAnalyzer/Pods-IBAnalyzer.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -116,6 +118,7 @@
 		A694A09C1E0F285D008A0A0A /* IBAnalyzerTests */ = {
 			isa = PBXGroup;
 			children = (
+				CE56BFBB235441C500414DED /* Examples */,
 				A66875051E2A813F004978F8 /* DirectoryContentsEnumeratorTests.swift */,
 				A694A09F1E0F285D008A0A0A /* Info.plist */,
 				A6AD226E1E2A9D6D00AFCEF1 /* ConnectionAnalyzerTests.swift */,
@@ -288,6 +291,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE56BFBC235441C500414DED /* Examples in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
