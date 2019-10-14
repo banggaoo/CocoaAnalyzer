@@ -1,4 +1,4 @@
-framework module SourceKittenFramework {
+module SourceKittenFramework {
   umbrella header "SourceKittenFramework-umbrella.h"
 
   export *

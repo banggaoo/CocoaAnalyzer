@@ -11,7 +11,7 @@ DEPENDENCIES:
   - Yams
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs:
     - SourceKittenFramework
     - SWXMLHash
     - Yams
@@ -21,6 +21,6 @@ SPEC CHECKSUMS:
   SWXMLHash: 87b0006848a548b7f9485b40bc71721b3ae39add
   Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: 190f023c032d2aa0b94c78842515b4df4d00aebc
+PODFILE CHECKSUM: 3338b1c4b6a132f1d316efb3aa7de45c0b9bb7a5
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.8.1

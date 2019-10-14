@@ -10,7 +10,7 @@ import Foundation
 import AppKit
 
 func printLog(_ string: String) {
-    print(string)
+//    print(string)
 }
 
 let isInUnitTests = NSClassFromString("XCTest") != nil
