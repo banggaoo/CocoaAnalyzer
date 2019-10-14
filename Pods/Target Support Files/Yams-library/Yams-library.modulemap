@@ -1,0 +1,6 @@
+module Yams {
+  umbrella header "Yams-library-umbrella.h"
+
+  export *
+  module * { export * }
+}

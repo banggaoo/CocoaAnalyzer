@@ -8,6 +8,9 @@ target 'IBAnalyzer' do
   pod 'SWXMLHash', '4.9.0'
   pod 'Yams', '2.0.0'
   pod 'SourceKittenFramework', '0.25.0'
-  target 'IBAnalyzerTests' do
-  end
+end
+
+target 'IBAnalyzerTests' do
+  use_frameworks!
+  pod 'SourceKittenFramework', '0.25.0'
 end

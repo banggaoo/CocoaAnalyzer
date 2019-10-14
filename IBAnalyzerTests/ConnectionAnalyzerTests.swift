@@ -114,7 +114,7 @@ class ConnectionAnalyzerTests: XCTestCase {
 
 // MARK: Util
 extension ConnectionAnalyzerTests {
-
+     
     private func getIssues(for configuration: AnalyzerConfiguration) -> [Issue] {
         var result = [Issue]()
         let connectionAnalyzer = ConnectionAnalyzer()
@@ -136,11 +136,5 @@ extension ConnectionAnalyzerTests {
             return typedIssue == issue
         }
         return sameIssues.hasElement
-    }
-}
-
-extension Array {
-    var hasElement: Bool {
-        return !isEmpty
     }
 }

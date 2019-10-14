@@ -1,0 +1,6 @@
+framework module Yams {
+  umbrella header "Yams-framework-umbrella.h"
+
+  export *
+  module * { export * }
+}
