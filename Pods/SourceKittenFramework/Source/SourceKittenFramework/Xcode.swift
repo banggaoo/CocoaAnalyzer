@@ -50,45 +50,10 @@ internal enum XcodeBuild {
      - returns: `xcodebuild`'s STDOUT output and, optionally, both STDERR+STDOUT output combined.
      */
     internal static func launch(arguments: [String], inPath path: String, pipingStandardError: Bool = true) -> Data {
-        let task = Process()
-        let pathOfXcodebuild = "/usr/bin/xcodebuild"
-        task.arguments = arguments
-
-        let pipe = Pipe()
-        task.standardOutput = pipe
-
-        if pipingStandardError {
-            task.standardError = pipe
-        }
-
-        do {
-        #if canImport(Darwin)
-            if #available(macOS 10.13, *) {
-                task.executableURL = URL(fileURLWithPath: pathOfXcodebuild)
-                task.currentDirectoryURL = URL(fileURLWithPath: path)
-                try task.run()
-            } else {
-                task.launchPath = pathOfXcodebuild
-                task.currentDirectoryPath = path
-                task.launch()
-            }
-        #elseif compiler(>=5)
-            task.executableURL = URL(fileURLWithPath: pathOfXcodebuild)
-            task.currentDirectoryURL = URL(fileURLWithPath: path)
-            try task.run()
-        #else
-            task.launchPath = pathOfXcodebuild
-            task.currentDirectoryPath = path
-            task.launch()
-        #endif
-        } catch {
-            return Data()
-        }
-
-        let file = pipe.fileHandleForReading
-        defer { file.closeFile() }
-
-        return file.readDataToEndOfFile()
+        return Exec.run("/usr/bin/xcodebuild",
+                        arguments,
+                        currentDirectory: path,
+                        stderr: pipingStandardError ? .merge : .inherit).data
     }
 
     /**
@@ -118,7 +83,7 @@ Will use the following values, in this priority: module name, target name, schem
 */
 internal func moduleName(fromArguments arguments: [String]) -> String? {
     for flag in ["-module-name", "-target", "-scheme"] {
-        if let flagIndex = arguments.index(of: flag), flagIndex + 1 < arguments.count {
+        if let flagIndex = arguments.firstIndex(of: flag), flagIndex + 1 < arguments.count {
             return arguments[flagIndex + 1]
         }
     }
@@ -134,7 +99,7 @@ Partially filters compiler arguments from `xcodebuild` to something that SourceK
           more flags to remove in `.1`.
 */
 private func partiallyFilter(arguments args: [String]) -> ([String], Bool) {
-    guard let indexOfFlagToRemove = args.index(of: "-output-file-map") else {
+    guard let indexOfFlagToRemove = args.firstIndex(of: "-output-file-map") else {
         return (args, false)
     }
     var args = args
@@ -233,37 +198,7 @@ public func sdkPath() -> String {
     // xcrun does not exist on Linux
     return ""
 #else
-    let task = Process()
-    let pathOfXcrun = "/usr/bin/xcrun"
-    task.arguments = ["--show-sdk-path", "--sdk", "macosx"]
-
-    let pipe = Pipe()
-    task.standardOutput = pipe
-
-    do {
-    #if canImport(Darwin)
-        if #available(macOS 10.13, *) {
-            task.executableURL = URL(fileURLWithPath: pathOfXcrun)
-            try task.run()
-        } else {
-            task.launchPath = pathOfXcrun
-            task.launch()
-        }
-    #elseif compiler(>=5)
-        task.executableURL = URL(fileURLWithPath: pathOfXcrun)
-        try task.run()
-    #else
-        task.launchPath = pathOfXcrun
-        task.launch()
-    #endif
-    } catch {
-        return ""
-    }
-
-    let file = pipe.fileHandleForReading
-    let sdkPath = String(data: file.readDataToEndOfFile(), encoding: .utf8)
-    file.closeFile()
-    return sdkPath?.replacingOccurrences(of: "\n", with: "") ?? ""
+    return Exec.run("/usr/bin/xcrun", "--show-sdk-path", "--sdk", "macosx").string ?? ""
 #endif
 }
 
@@ -297,15 +232,15 @@ internal func checkNewBuildSystem(in projectTempRoot: String, moduleName: String
         let result = manifestURLs.lazy.compactMap { manifestURL -> [String]? in
             guard let contents = try? String(contentsOf: manifestURL),
                 let yaml = try? Yams.compose(yaml: contents),
-                let commands = yaml["commands"]?.mapping?.values else {
+                let commands = (yaml as Node?)?["commands"]?.mapping?.values else {
                     return nil
             }
             for command in commands where command["description"]?.string?.hasSuffix("com.apple.xcode.tools.swift.compiler") ?? false {
                 if let args = command["args"]?.sequence,
-                    let index = args.index(of: "-module-name"),
+                    let index = args.firstIndex(of: "-module-name"),
                     moduleName != nil ? args[args.index(after: index)].string == moduleName : true {
                     let fullArgs = args.compactMap { $0.string }
-                    let swiftCIndex = fullArgs.index(of: "--").flatMap(fullArgs.index(after:)) ?? fullArgs.startIndex
+                    let swiftCIndex = fullArgs.firstIndex(of: "--").flatMap(fullArgs.index(after:)) ?? fullArgs.startIndex
                     return Array(fullArgs.suffix(from: fullArgs.index(after: swiftCIndex)))
                 }
             }
