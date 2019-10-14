@@ -7,80 +7,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
-
-extension String {
-    subscript(safe range: Range<Index>) -> Substring {
-        let endIndex: Index = self.endIndex
-        let lowerRangeIndex: Index = range.lowerBound
-        let upperRangeIndex: Index = range.upperBound
-        let subscriptedRange = Range(uncheckedBounds: (lower: Swift.min(lowerRangeIndex, endIndex), upper: Swift.min(upperRangeIndex, endIndex)))
-        
-        return self[subscriptedRange]
-    }
-}
-
-struct Declaration {
-    var name: String
-    var line: Int
-    var column: Int
-    var url: URL?
-    var isOptional: Bool
-
-    init(name: String, line: Int, column: Int, url: URL? = nil, isOptional: Bool = false) {
-        self.name = name
-        self.line = line
-        self.column = column
-        self.url = url
-        self.isOptional = isOptional
-    }
-
-    init(name: String, file: File, offset: Int64, isOptional: Bool = false) {
-        let fileOffset = type(of: self).getLineColumnNumber(of: file, offset: Int(offset))
-        var url: URL?
-        if let path = file.path {
-            url = URL(fileURLWithPath: path)
-        }
-        self.init(name: name, line: fileOffset.line, column: fileOffset.column, url: url, isOptional: isOptional)
-    }
-
-    var description: String {
-        return filePath+":\(line):\(column)"
-    }
-
-    var filePath: String {
-        if let path = url?.absoluteString {
-            return path.replacingOccurrences(of: "file://", with: "").replacingOccurrences(of: "%20", with: " ")
-        }
-        return name
-    }
-
-    func fileName(className: String) -> String {
-        if let filename = url?.lastPathComponent {
-            return filename
-        }
-        return className
-    }
-
-    private static func getLineColumnNumber(of file: File, offset: Int) -> (line: Int, column: Int) {
-        printLog("file.contents "+String(describing: file.contents))
-        
-        let range = file.contents.startIndex..<(file.contents.index(file.contents.startIndex, offsetBy: offset, limitedBy: file.contents.endIndex) ?? file.contents.endIndex)
-        let subString = file.contents[safe: range] // .substring(with: range)
-        let lines = subString.components(separatedBy: "\n")
-
-        if let column = lines.last?.count {
-            return (line: lines.count, column: column)
-        }
-        return (line: lines.count, column: 0)
-    }
-}
-
-extension Declaration: Equatable {
-    public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
-        return lhs.name == rhs.name
-    }
-}
 
 enum ConnectionIssue: Issue {
     case missingOutlet(className: String, outlet: Declaration)
@@ -90,11 +16,11 @@ enum ConnectionIssue: Issue {
 
     var description: String {
         switch self {
-        case let .missingOutlet(className: className, outlet: outlet):
+        case let .missingOutlet(className, outlet):
             return "\(outlet.description): warning: IBOutlet missing: \(outlet.name) is not implemented in \(outlet.fileName(className: className))"
-        case let .missingAction(className: className, action: action):
+        case let .missingAction(className, action):
             return "\(action.description): warning: IBAction missing: \(action.name) is not implemented in \(action.fileName(className: className))"
-        case let .unnecessaryOutlet(className: className, outlet: outlet):
+        case let .unnecessaryOutlet(className, outlet):
             if Configuration.shared.isEnabled(.ignoreOptionalProperty) && outlet.isOptional {
                 return ""
             }
@@ -102,7 +28,7 @@ enum ConnectionIssue: Issue {
                 ", remove warning by adding '\(Rule.ignoreOptionalProperty.rawValue)' argument" :
                 ", consider set '\(outlet.name)' Optional"
             return "\(outlet.description): warning: IBOutlet unused: \(outlet.name) not linked in \(outlet.fileName(className: className))"+suggestion
-        case let .unnecessaryAction(className: className, action: action):
+        case let .unnecessaryAction(className, action):
             return "\(action.description): warning: IBAction unused: \(action.name) not linked in \(action.fileName(className: className))"
         }
     }
@@ -117,36 +43,11 @@ enum ConnectionIssue: Issue {
     }
 }
 
-enum Rule: String {
-    case ignoreOptionalProperty //track optional properties
-}
-
-class Configuration {
-
-    static let shared = Configuration()
-
-    var configuration: [Rule: Bool] =
-        [.ignoreOptionalProperty: false]
-
-    private init() { }
-
-    func setup(with arguments: [String]) {
-        for argument in arguments {
-            if let rule = Rule(rawValue: argument) {
-                self.configuration[rule] = true
-            }
-        }
-    }
-
-    func isEnabled(_ rule: Rule) -> Bool {
-        return configuration[rule] ?? false
-    }
-}
-
 struct ConnectionAnalyzer: Analyzer {
 
     func issues(for configuration: AnalyzerConfiguration) -> [Issue] {
-        var result: [Issue] = missingElements(for: configuration)
+        var result = [Issue]()
+        result.append(contentsOf: missingElements(for: configuration))
         result.append(contentsOf: unnecessaryElements(for: configuration))
         return result
     }

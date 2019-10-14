@@ -27,39 +27,52 @@ class Runner {
         self.swiftParser = swiftParser
         self.fileManager = fileManager
     }
+    
+    func runDigonasis() throws -> [Issue] {
+        return try issues(using: [ConnectionAnalyzer()])
+    }
 
     func issues(using analyzers: [Analyzer]) throws -> [Issue] {
         var classNameToNibMap: [String: Nib] = [:]
         var classNameToClassMap: [String: Class] = [:]
  
-        let files = try nibFiles()
-        for url in files {
+        let manager = FileManager.default
+        var fileIssues = [FileIssue]()
+        
+        let nibFiles = try getNibFiles()
+        for url in nibFiles {
             printLog("nib "+url.absoluteString)
 
-            let connections = try nibParser.mappingForFile(at: url)
-            for (key, value) in connections {
-                classNameToNibMap[key] = value
+            let fileName = url.deletingPathExtension().lastPathComponent
+            let swiftFileName = fileName + ".swift"
+            let swiftUrl = url.deletingLastPathComponent().appendingPathComponent(swiftFileName).standardized
+            
+            if manager.fileExists(atPath: swiftUrl.path) {
+
+                let connections = try nibParser.mappingForFile(at: url)
+                for (key, value) in connections {
+                    classNameToNibMap[key] = value
+                }
+                
+                try swiftParser.mappingForFile(at: swiftUrl, result: &classNameToClassMap)
+            } else {
+                let issue = FileIssue.cannotFindSource(fileName: swiftUrl.lastPathComponent)
+                fileIssues.append(issue)
             }
         }
-
-        for url in try swiftFiles() {
-            printLog("swift "+url.absoluteString)
-
-            try swiftParser.mappingForFile(at: url, result: &classNameToClassMap)
-        }
-
         let configuration = AnalyzerConfiguration(classNameToNibMap: classNameToNibMap,
                                                   classNameToClassMap: classNameToClassMap,
                                                   uiKitClassNameToClassMap: uiKitClassNameToClass())
-
-        return analyzers.flatMap { $0.issues(for: configuration) }
+        let issues = analyzers.flatMap { $0.issues(for: configuration) }
+        return issues + fileIssues
     }
 
-    func nibFiles() throws -> [URL] {
+    
+    func getNibFiles() throws -> [URL] {
         return try files().filter { $0.pathExtension == "storyboard" || $0.pathExtension == "xib"}
     }
 
-    func swiftFiles() throws -> [URL] {
+    func getSwiftFiles() throws -> [URL] {
         return try files().filter { $0.pathExtension == "swift" }
     }
 

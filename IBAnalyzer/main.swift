@@ -40,7 +40,7 @@ if !isInUnitTests {
         
         printLog("args: \(runner)")
 
-        let issues = try runner.issues(using: [ConnectionAnalyzer()])
+        let issues = try runner.runDigonasis()
         
         printLog("issues: \(issues)")
 
