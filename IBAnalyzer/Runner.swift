@@ -38,27 +38,35 @@ class Runner {
  
         let manager = FileManager.default
         var fileIssues = [FileIssue]()
-        
+       
         let nibFiles = try getNibFiles()
         for url in nibFiles {
             printLog("nib "+url.absoluteString)
-
+            
             let fileName = url.deletingPathExtension().lastPathComponent
             let swiftFileName = fileName + ".swift"
             let swiftUrl = url.deletingLastPathComponent().appendingPathComponent(swiftFileName).standardized
             
             if manager.fileExists(atPath: swiftUrl.path) {
-
                 let connections = try nibParser.mappingForFile(at: url)
                 for (key, value) in connections {
-                    classNameToNibMap[key] = value
+                    if let nib = classNameToNibMap[key] {
+                        if nib.count < value.count {
+                            classNameToNibMap[key] = value
+                        }
+                    } else {
+                        classNameToNibMap[key] = value
+                    }
                 }
-                
-                try swiftParser.mappingForFile(at: swiftUrl, result: &classNameToClassMap)
             } else {
                 let issue = FileIssue.cannotFindSource(fileName: swiftUrl.lastPathComponent)
                 fileIssues.append(issue)
             }
+        }
+           
+        let swiftFiles = try getSwiftFiles()
+        for url in swiftFiles {
+            try swiftParser.mappingForFile(at: url, result: &classNameToClassMap)
         }
         let configuration = AnalyzerConfiguration(classNameToNibMap: classNameToNibMap,
                                                   classNameToClassMap: classNameToClassMap,
@@ -81,3 +89,4 @@ class Runner {
         return try directoryEnumerator.files(at: url, fileManager: fileManager)
     }
 }
+

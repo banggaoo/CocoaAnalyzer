@@ -18,3 +18,13 @@ extension Nib: Equatable {
         return lhs.outlets == rhs.outlets && lhs.actions == rhs.actions
     }
 }
+
+protocol Countable {
+    var count: Int { get }
+}
+
+extension Nib: Countable {
+    var count: Int {
+        return outlets.count + actions.count
+    }
+}
