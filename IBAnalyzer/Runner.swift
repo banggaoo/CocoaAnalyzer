@@ -64,7 +64,7 @@ class Runner {
                                                   classNameToClassMap: classNameToClassMap,
                                                   uiKitClassNameToClassMap: uiKitClassNameToClass())
         let issues = analyzers.flatMap { $0.issues(for: configuration) }
-        return issues + fileIssues
+        return fileIssues + issues
     }
 
     
