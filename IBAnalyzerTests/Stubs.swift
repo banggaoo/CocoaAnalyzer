@@ -11,7 +11,7 @@ import Foundation
 
 struct StubFineDirectoryContentsEnumerator: DirectoryContentsEnumeratorType {
     func files(at url: URL, fileManager: FileManager) throws -> [URL] {
-        return ["a.swift", "b.m", "c.xib", "d.storyboard", "e.swift", "f.swift2"].map {
+        return ["a.swift", "b.m", "a.xib", "e.storyboard", "e.swift", "f.swift2"].map {
             URL(fileURLWithPath: $0)
         }
     }
@@ -34,9 +34,9 @@ struct StubNibParser: NibParserType {
 
     func mappingForFile(at url: URL) throws -> [String: Nib] {
         switch url {
-        case URL(fileURLWithPath: "c.xib"):
+        case URL(fileURLWithPath: "a.xib"):
             return type(of: self).cMap
-        case URL(fileURLWithPath: "d.storyboard"):
+        case URL(fileURLWithPath: "e.storyboard"):
             return type(of: self).dMap
         default:
             fatalError()

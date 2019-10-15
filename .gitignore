@@ -67,3 +67,7 @@ fastlane/screenshots
 fastlane/test_output
 
 .apitoken
+
+
+## Test
+IBAnalyzerTests/Examples-NestedXib/

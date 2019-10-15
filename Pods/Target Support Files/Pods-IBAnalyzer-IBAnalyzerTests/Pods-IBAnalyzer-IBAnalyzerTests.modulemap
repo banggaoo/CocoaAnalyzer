@@ -1,6 +1,0 @@
-module Pods_IBAnalyzer_IBAnalyzerTests {
-  umbrella header "Pods-IBAnalyzer-IBAnalyzerTests-umbrella.h"
-
-  export *
-  module * { export * }
-}
